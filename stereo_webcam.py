@@ -6,46 +6,10 @@ from machinevisiontoolbox import WebCam
 import matplotlib.pyplot as plt
 import numpy as np
 
-# class camThread(threading.Thread):
-#     def __init__(self, previewName, camID):
-#         threading.Thread.__init__(self)
-#         self.previewName = previewName
-#         self.camID = camID
-#     def run(self):
-#         print("Starting " + self.previewName)
-#         camPreview(self.previewName, self.camID)
-
-# def camPreview(previewName, camID):
-#     cv2.namedWindow(previewName)
-#     cam = cv2.VideoCapture(camID)
-#     cam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-#     cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
-#     if cam.isOpened():
-#         rval, frame = cam.read()
-#     else:
-#         rval = False
-
-#     while rval:
-#         cv2.imshow(previewName, frame)
-#         rval, frame = cam.read()
-#         key = cv2.waitKey(20)
-#         if key == 27:  # exit on ESC
-#             break
-#     cv2.destroyWindow(previewName)
-
-
-
 if __name__ == "__main__":
     K = np.matrix([[1500, 0, 640],[0, 1500, 360],[0, 0, 1]])
     b = .075 # 75 mm baseline distance
     # cam = StereoCam(K, K, b)
-    
-    # Create threads as follows
-    # thread1 = camThread("Camera 1", 0)
-    # thread2 = camThread("Camera 2", 1)
-    # thread1.start()
-    # thread2.start()
-
         
     # OpenCV webcam test
     cam0 = cv2.VideoCapture(0) #left
