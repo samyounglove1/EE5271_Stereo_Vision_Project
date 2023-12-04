@@ -33,7 +33,7 @@ def stereoWebcamCalibrate():
     cv2.namedWindow('cornersL', cv2.WINDOW_NORMAL)
     
     # first calibrate cams individually
-    for i in tqdm(range(0, count)):
+    for i in tqdm(range(0, 28)):
         imgL = cv2.imread(pathL+"%d.png"%i)
         imgR = cv2.imread(pathR+"%d.png"%i)
         imgL_g = cv2.cvtColor(imgL, cv2.COLOR_BGR2GRAY)
@@ -51,7 +51,7 @@ def stereoWebcamCalibrate():
             cv2.drawChessboardCorners(imgL,(10,7),cornersL,retL)    
             cv2.imshow('cornersR',imgR)
             cv2.imshow('cornersL',imgL)
-            key = cv2.waitKey(0)
+            key = cv2.waitKey(50)
             # if key == ord('y'):
             img_ptsL.append(cornersL)
             img_ptsR.append(cornersR)
