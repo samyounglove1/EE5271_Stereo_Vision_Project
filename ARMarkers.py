@@ -112,6 +112,7 @@ def test():
 
 
 
+# This is what you need to do between the depth map and displaying it on the matrix
 def test2():
     img = cv2.imread("../FinalProjectTemp/images/stereoLeft/imageL0.png")
     cv2.imshow("Image", img)
@@ -147,4 +148,4 @@ def poseEstimation(img, camera_matrix, dist_coeffs, marker_side_length):
 
 
 if __name__ == "__main__":
-    test2()
+    generateARMarker(3)
