@@ -22,7 +22,7 @@ def getBoundaryCorners(image):
     detector = cv2.aruco.ArucoDetector(AR_MARKER_DICTIONARY, params)
     corners, ids, rejected = detector.detectMarkers(image)
 
-    if len(ids) != 4:
+    if ids is None or len(ids) != 4:
         return None
     
     outer_corners = []
@@ -124,6 +124,13 @@ def test2():
     print("Press any key to exit")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
+def findArZone(img, depth_map) :
+    corners = getBoundaryCorners(img)
+    if corners == None:
+        return depth_map, False
+    return cropDepthMap(depth_map, corners), True
+    
 
 
 

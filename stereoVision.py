@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 
 #internal utilities
 import stereoUtils as utils
+import ARMarkers as ar
 
 if __name__ == "__main__":    
     K = np.matrix([[1500, 0, 640],[0, 1500, 360],[0, 0, 1]])
@@ -28,15 +29,22 @@ if __name__ == "__main__":
     cam1.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
     cam1.set(cv2.CAP_PROP_FPS, 10)
     print('cam 2 configured')
-    
-    iml = cv2.imread('./images/calibration/webcam_left_10.png', 0)
-    imr = cv2.imread('./images/calibration/webcam_right_10.png',0)
+
     
     maxDisparity = 128
     stereo = cv2.StereoSGBM_create(0, maxDisparity, 21)
+    # stereo.setMode(cv2.StereoSGBM_MODE_HH)
     
-    
+    # fig, axs = plt.subplots(2, 3)
     # plt.ion()
+    # fig.show()
+    # axs[0, 0].set_title('Image')
+    # axs[0, 1].set_title('Disparity Map')
+    # axs[0, 2].set_title('Depth Map')
+    # axs[1, 0].setTitle('Image')
+    
+    plt.ion()
+    cv2.namedWindow('led matrix', cv2.WINDOW_NORMAL)
     while True:
         check0, iml = cam0.read()
         imlg = cv2.cvtColor(iml, cv2.COLOR_BGR2GRAY)
@@ -51,56 +59,56 @@ if __name__ == "__main__":
         disparity_colour_mapped = cv2.applyColorMap(
             (disparity_scaled * (256. / maxDisparity)).astype(np.uint8),
             cv2.COLORMAP_HOT)
-        cv2.imshow('disparity map', disparity_colour_mapped)
+        disparity_scaled[disparity_scaled == 0] = 0.0001
         
         u0 = K[0, 2]/2
         v0 = K[1, 2]/2
         Z = (K[0,0]/2) * b / disparity_scaled
         Z[Z < 0] = 0
-        Z[Z > 5] = 5
+        
+        limit = 3
+        Z[Z > limit] = limit
         depth = Z
         
+        # depth_colour_mapped = cv2.applyColorMap(
+        #     (depth * (256. / limit)).astype(np.uint8),
+        #     cv2.COLORMAP_HOT)
         depth_colour_mapped = cv2.applyColorMap(
-            (depth * (256. / 5)).astype(np.uint8),
+            (depth * (256. / limit)).astype(np.uint8),
             cv2.COLORMAP_HOT)
         # plt.imshow(Z, 'hot')
         # cv2.imshow('depth estimate', Z)
+        cv2.imshow('disparity map', disparity_colour_mapped)
         cv2.imshow('depth estimate', depth_colour_mapped)
-        cv2.imshow('uleft', uiml)
+        # plt.imshow(depth, 'hot')
+        cv2.imshow('undistorted rectified left image', uiml)
         
+        # find region of interest
+        roi, found = ar.findArZone(uiml, depth)
         
+        #need to potentially crop more of the image to the left
+        # h, w = depth.shape
+        if not found:
+            roi = roi[:,127:]
+            
+        roi_inv = limit - roi[:]
         
+        roi_colormap = cv2.applyColorMap(
+            (roi * (256. / limit)).astype(np.uint8),
+            cv2.COLORMAP_HOT)
+        cv2.imshow('region of interest depth', roi_colormap)
+
+        
+        led_matrix = cv2.resize(roi_colormap, (32, 32))
+        cv2.imshow('led matrix', led_matrix)
+        # cv2.imshow('maskedZoneU', maskeduIml)
+        
+        # axs[0, 0].imshow(uiml)
+        # axs[0, 1].imshow(disparity_scaled)
+        # axs[0, 2].imshow(Z, 'hot')
         
         key = cv2.waitKey(50)
         if key == 27:
             break
-    
-    
-    #     # Scaling down the disparity values and normalizing them
-    #     disparity2 = (disparity / 16.0 - minDisparity) / numDisparities
-    #     # disparity[disparity==0] = 0.0000001
-    #     # status = np.ones(disparity.shape)
-    #     u0 = K[0, 2]/2
-    #     v0 = K[1, 2]/2
-    #     Z = (K[0,0]/2) * b / disparity
-    #     # Z[Z < 0] = 0
-    #     # Z[Z > 2] = 2
-    
-    
-    # plt.imshow(disparity, 'gray')
-    # plt.show()
-    # #WIP
-    # disparity[disparity==0] = 0.0000001
-    # # status = np.ones(disparity.shape)
-    # u0 = K[0, 2]/2
-    # v0 = K[1, 2]/2
-    # Z = (K[0,0]/2) * b / disparity
-    # Z[Z < 0] = 0
-    # Z[Z > 2] = 2
-    
-    # cv2.imshow('ur left', uIml)
-    # # cv2.imshow('disparity', )
-    # cv2.imshow('ur right', uImr)
-    # plt.imshow(Z, 'hot')
-    # plt.show()
-    # cv2.waitKey(0)
+        
+    cv2.destroyAllWindows()
