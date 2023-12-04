@@ -3,7 +3,7 @@ import numpy as np
 
 AR_MARKER_DICTIONARY = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 AR_MARKER_SIZE = 300
-ORIGIN_MARKER_ID = 1
+ORIGIN_MARKER_ID = 0
 
 
 # Generate an AR marker with a given ID using the dictionary defined above
@@ -14,16 +14,52 @@ def generateARMarker(id):
 
 
 
+# Get the outer corners of the four AR markers.
+# Returns None if all markers are not detected. If this happens, get a new image and try again.
+# Only need to get the corners once at the beginning of the program.
+def getBoundaryCorners(image):
+    params = cv2.aruco.DetectorParameters()
+    detector = cv2.aruco.ArucoDetector(AR_MARKER_DICTIONARY, params)
+    corners, ids, rejected = detector.detectMarkers(image)
+
+    if len(ids) != 4:
+        return None
+    
+    outer_corners = []
+    for i in range(4):
+        id = ids[i][0]
+        outer_corners.append(corners[i][0][id])
+
+    return outer_corners
+
+
+
+# Crops the depth map to fit the boundaries defined by the AR markers
+def cropDepthMap(depth_map, corners):
+    corners_x = []
+    corners_y = []
+    for i in range(4):
+        corners_x.append(corners[i][0])
+        corners_y.append(corners[i][1])
+
+    x_min = int(np.min(corners_x))
+    x_max = int(np.max(corners_x))
+    y_min = int(np.min(corners_y))
+    y_max = int(np.max(corners_y))
+    return depth_map[y_min:y_max, x_min:x_max]
+
+
+
 def test():
     # This is a picture of a marker from DICT_4X4_50
-    img1 = cv2.imread("../FinalProjectTemp/images/stereoLeft/imageL0.png")
+    img = cv2.imread("../FinalProjectTemp/images/stereoLeft/imageL0.png")
     
 
     params = cv2.aruco.DetectorParameters()
     detector = cv2.aruco.ArucoDetector(AR_MARKER_DICTIONARY, params)
-    corners, ids, rejected = detector.detectMarkers(img1)
-    cv2.aruco.drawDetectedMarkers(img1, corners, ids)
-    cv2.imshow('Img 1', img1)
+    corners, ids, rejected = detector.detectMarkers(img)
+    cv2.aruco.drawDetectedMarkers(img, corners, ids)
+    cv2.imshow('Img 1', img)
 
     # if you call poseEstimation() and then cv2.drawFrameAxes() it should
     # correctly show a set of axes on the image, I just haven't done calibration
@@ -31,11 +67,63 @@ def test():
 
     print(corners)
     print(ids)
+    print(corners[0][0][0][0])
+
+    corners_u = []
+    corners_v = []
+    for i in range(4):
+        id = ids[i][0]
+        corners_u.append(corners[i][0][id][0])
+        corners_v.append(corners[i][0][id][1])
+
+    print(corners_u)
+    print(corners_v)
+
+    u_min = int(np.min(corners_u))
+    u_max = int(np.max(corners_u))
+    v_min = int(np.min(corners_v))
+    v_max = int(np.max(corners_v))
+
+    print(img.shape)
+    print(u_min, u_max, v_min, v_max)
+    print()
+
+    cropped_img = img[v_min:v_max, u_min:u_max]
+    cv2.imshow("Cropped image", cropped_img)
+
+    # id_index = [-1, -1, -1, -1]
+    # img_corners = []
+    # for i in range(4):
+    #     id = ids[i][0]
+    #     id_index[id] = i
+    #     print(id)
+    #     print(corners[i][0][id])
+    #     img_corners.append(corners[i][0][id])
+    # print(img_corners)
+
+    # pts = np.array([[img_corners[id_index[0]], img_corners[id_index[1]], img_corners[id_index[2]], img_corners[id_index[3]]]], dtype=np.int32)
+    
+    # removePixelsOutsideBoundary(img, pts)
+
 
     print("Press any key to exit")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    
+
+
+
+# This is what you need to do between the depth map and displaying it on the matrix
+def test2():
+    img = cv2.imread("../FinalProjectTemp/images/stereoLeft/imageL0.png")
+    cv2.imshow("Image", img)
+
+    corners = getBoundaryCorners(img)
+    cropped_img = cropDepthMap(img, corners)
+    cv2.imshow("Cropped Image", cropped_img)
+
+    print("Press any key to exit")
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 
@@ -60,4 +148,4 @@ def poseEstimation(img, camera_matrix, dist_coeffs, marker_side_length):
 
 
 if __name__ == "__main__":
-    test()
+    generateARMarker(3)
