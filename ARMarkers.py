@@ -22,11 +22,12 @@ def getBoundaryCorners(image):
     detector = cv2.aruco.ArucoDetector(AR_MARKER_DICTIONARY, params)
     corners, ids, rejected = detector.detectMarkers(image)
 
-    if ids is None or len(ids) != 4:
+    num_ids = len(ids)
+    if ids is None or not (num_ids == 3 or num_ids == 4):
         return None
     
     outer_corners = []
-    for i in range(4):
+    for i in range(num_ids):
         id = ids[i][0]
         outer_corners.append(corners[i][0][id])
 
@@ -38,7 +39,7 @@ def getBoundaryCorners(image):
 def cropDepthMap(depth_map, corners):
     corners_x = []
     corners_y = []
-    for i in range(4):
+    for i in range(len(corners)):
         corners_x.append(corners[i][0])
         corners_y.append(corners[i][1])
 
