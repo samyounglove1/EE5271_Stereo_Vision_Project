@@ -15,7 +15,8 @@ if __name__ == "__main__":
     
     # OpenCV webcam test
     print('opening cam 1')
-    cam0 = cv2.VideoCapture(0, cv2.CAP_DSHOW) #left
+    # cam0 = cv2.VideoCapture(0, cv2.CAP_DSHOW) #left
+    cam0 = cv2.VideoCapture(0, cv2.CAP_V4L2) #left
     print('cam 1 opened')
     cam0.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cam0.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
@@ -23,7 +24,8 @@ if __name__ == "__main__":
     print('cam 1 configured')
     
     print('opening cam 2')
-    cam1 = cv2.VideoCapture(1, cv2.CAP_DSHOW) #right
+    # cam1 = cv2.VideoCapture(2, cv2.CAP_DSHOW) #right
+    cam1 = cv2.VideoCapture(2, cv2.CAP_V4L2) #right
     print('cam 2 opened')
     cam1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cam1.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
@@ -45,6 +47,13 @@ if __name__ == "__main__":
     
     plt.ion()
     cv2.namedWindow('led matrix', cv2.WINDOW_NORMAL)
+    
+    check0, iml = cam0.read()
+    check1, imr = cam1.read()
+    
+    
+    # key = cv2.waitKey()
+    
     while True:
         check0, iml = cam0.read()
         imlg = cv2.cvtColor(iml, cv2.COLOR_BGR2GRAY)
@@ -78,8 +87,8 @@ if __name__ == "__main__":
             cv2.COLORMAP_HOT)
         # plt.imshow(Z, 'hot')
         # cv2.imshow('depth estimate', Z)
-        cv2.imshow('disparity map', disparity_colour_mapped)
-        cv2.imshow('depth estimate', depth_colour_mapped)
+        # cv2.imshow('disparity map', disparity_colour_mapped)
+        # cv2.imshow('depth estimate', depth_colour_mapped)
         # plt.imshow(depth, 'hot')
         cv2.imshow('undistorted rectified left image', uiml)
         
