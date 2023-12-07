@@ -22,8 +22,11 @@ def getBoundaryCorners(image):
     detector = cv2.aruco.ArucoDetector(AR_MARKER_DICTIONARY, params)
     corners, ids, rejected = detector.detectMarkers(image)
 
+    
+    if ids is None:
+        return None
     num_ids = len(ids)
-    if ids is None or not (num_ids == 3 or num_ids == 4):
+    if not (num_ids == 3 or num_ids == 4):
         return None
     
     outer_corners = []
