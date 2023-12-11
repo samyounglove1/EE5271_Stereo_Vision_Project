@@ -5,6 +5,8 @@ from matplotlib import pyplot as plt
 #internal utilities
 import stereoUtils as utils
 import ARMarkers as ar
+from LedMatrix import LedMatrix
+
 
 if __name__ == "__main__":    
     K = np.matrix([[1500, 0, 640],[0, 1500, 360],[0, 0, 1]])
@@ -107,9 +109,11 @@ if __name__ == "__main__":
             cv2.COLORMAP_HOT)
         cv2.imshow('region of interest depth', roi_colormap)
 
-        
-        led_matrix = cv2.resize(roi_colormap, (32, 32))
-        cv2.imshow('led matrix', led_matrix)
+        dim: tuple = (16, 16)
+        led_data = cv2.resize(roi_colormap, dim)
+        LedMatrix(led_data, dim=dim, colorCorrect=False).display()
+
+        cv2.imshow('led matrix', led_data)
         # cv2.imshow('maskedZoneU', maskeduIml)
         
         # axs[0, 0].imshow(uiml)
